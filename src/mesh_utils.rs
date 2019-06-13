@@ -5,10 +5,10 @@ use wavefront_obj::obj::{Shape, Primitive};
 
 pub(crate) fn generate_test_mesh(radius: f32, position: Vec3) -> Mesh {
     let mut builder = MeshBuilder::new();
-    let v0 = builder.push_vertex(Vec3::new(position.x(), position.y() + radius, position.z()));
-    let v1 = builder.push_vertex(Vec3::new(position.x() - radius, position.y(), position.z()));
-    let v2 = builder.push_vertex(Vec3::new(position.x() + radius, position.y(), position.z()));
-    let v3 = builder.push_vertex(Vec3::new(position.x(), position.y(), position.z() + radius));
+    let v0 = builder.push_vertex(Vec3::new(position.x(), position.y() + radius, position.z()), Vec3::zeros());
+    let v1 = builder.push_vertex(Vec3::new(position.x() - radius, position.y(), position.z()), Vec3::zeros());
+    let v2 = builder.push_vertex(Vec3::new(position.x() + radius, position.y(), position.z()), Vec3::zeros());
+    let v3 = builder.push_vertex(Vec3::new(position.x(), position.y(), position.z() + radius), Vec3::zeros());
 
     builder.push_face(v0, v1, v2);
     builder.push_face(v0, v1, v3);
@@ -23,7 +23,11 @@ pub(crate) fn load_obj<P: AsRef<Path>>(path: P) -> Mesh {
     let object = &obj.objects[0];
     let mut mesh = MeshBuilder::new();
 
-    let vertices: Vec<VertexIndex> = object.vertices.iter().map(|it| mesh.push_vertex(Vec3::new(it.x as f32, it.y as f32, it.z as f32))).collect();
+    let vertices: Vec<VertexIndex> = object.vertices.iter()
+        .map(|it| mesh.push_vertex(
+            Vec3::new(it.x as f32, it.y as f32, it.z as f32),
+            Vec3::zeros(),
+        )).collect();
 
     for g in &object.geometry {
         for shape in &g.shapes {

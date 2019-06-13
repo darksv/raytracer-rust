@@ -3,6 +3,7 @@ use crate::ray::Ray;
 
 pub(crate) struct Mesh {
     vertices: Vec<Vec3>,
+    normals: Vec<Vec3>,
     triangles: Vec<(u32, u32, u32)>,
     aabb: Aabb,
 }
@@ -33,6 +34,7 @@ impl Default for Aabb {
 
 pub(crate) struct MeshBuilder {
     vertices: Vec<Vec3>,
+    normals: Vec<Vec3>,
     triangles: Vec<(u32, u32, u32)>,
 }
 
@@ -40,13 +42,15 @@ impl MeshBuilder {
     pub(crate) fn new() -> Self {
         Self {
             vertices: vec![],
+            normals: vec![],
             triangles: vec![],
         }
     }
 
-    pub(crate) fn push_vertex(&mut self, v: Vec3) -> VertexIndex {
+    pub(crate) fn push_vertex(&mut self, v: Vec3, n: Vec3) -> VertexIndex {
         let idx = self.vertices.len() as u32;
         self.vertices.push(v);
+        self.normals.push(n);
         VertexIndex(idx)
     }
 
@@ -69,6 +73,7 @@ impl MeshBuilder {
 
         Mesh {
             vertices: self.vertices,
+            normals: self.normals,
             triangles: self.triangles,
             aabb,
         }
@@ -82,6 +87,7 @@ impl Mesh {
     pub(crate) fn new() -> Self {
         Self {
             vertices: vec![],
+            normals: vec![],
             triangles: vec![],
             aabb: Aabb::default(),
         }

@@ -10,6 +10,12 @@ impl Vec3 {
         }
     }
 
+    pub(crate) fn zeros() -> Self {
+        Self {
+            raw: [0.0; 3],
+        }
+    }
+
     pub(crate) fn x(&self) -> f32 { self.raw[0] }
     pub(crate) fn y(&self) -> f32 { self.raw[1] }
     pub(crate) fn z(&self) -> f32 { self.raw[2] }
