@@ -69,13 +69,13 @@ impl Material for Dielectric {
             (
                 -hr.normal,
                 self.ref_idx,
-                self.ref_idx * Vec3::dot(r_in.direction, hr.normal) / r_in.direction.len()
+                self.ref_idx * Vec3::dot(r_in.direction, hr.normal) / r_in.direction.length()
             )
         } else {
             (
                 hr.normal,
                 1.0 / self.ref_idx,
-                -Vec3::dot(r_in.direction, hr.normal) / r_in.direction.len()
+                -Vec3::dot(r_in.direction, hr.normal) / r_in.direction.length()
             )
         };
 

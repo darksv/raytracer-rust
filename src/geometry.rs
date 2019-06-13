@@ -24,16 +24,24 @@ impl Vec3 {
         (x * x + y * y + z * z).sqrt()
     }
 
-    pub(crate) fn len(&self) -> f32 {
+    pub(crate) fn length(&self) -> f32 {
         self.squared_len().sqrt()
     }
 
     pub(crate) fn normalize(&self) -> Vec3 {
-        *self * (1.0 / self.len())
+        *self * (1.0 / self.length())
     }
 
     pub(crate) fn dot(lhs: Vec3, rhs: Vec3) -> f32 {
         lhs.x() * rhs.x() + lhs.y() * rhs.y() + lhs.z() * rhs.z()
+    }
+
+    pub(crate) fn cross(lhs: Vec3, rhs: Vec3) -> Vec3 {
+        Vec3::new(
+            lhs.y() * rhs.z() - lhs.z() * rhs.y(),
+            lhs.z() * rhs.x() - lhs.x() * rhs.z(),
+            lhs.x() * rhs.y() - lhs.y() * rhs.x(),
+        )
     }
 }
 

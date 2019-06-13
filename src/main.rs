@@ -9,6 +9,9 @@ mod hitable_list;
 mod sphere;
 mod camera;
 mod material;
+mod triangulated_model;
+mod mesh;
+mod mesh_utils;
 
 use crate::geometry::Vec3;
 use crate::ray::Ray;
@@ -18,6 +21,7 @@ use crate::sphere::Sphere;
 use crate::camera::Camera;
 use crate::material::{ScatterInfo, Lambertian, Metal, Dielectric};
 use std::sync::Arc;
+use crate::triangulated_model::TriangulatedModel;
 
 fn color(ray: &Ray, hitable: &dyn Hitable, depth: usize) -> Vec3 {
     match hitable.hit(ray, 0.001, std::f32::INFINITY) {
@@ -51,15 +55,16 @@ fn main() -> Result<(), Box<dyn Error>> {
     let height = 1080;
     let ns = 100;
 
-
     let hitables = HitableList::from_vec(vec![
-        Box::new(Sphere {
-            center: Vec3::new(0.0, 0.0, -1.0),
-            radius: 0.5,
-            material: Arc::new(
+        Box::new(TriangulatedModel::new(
+            mesh_utils::generate_test_mesh(
+                0.2,
+                Vec3::new(0.0, 0.0, -1.0),
+            ),
+            Arc::new(
                 Lambertian { albedo: Vec3::new(0.8, 0.3, 0.3) }
             ),
-        }),
+        )),
         Box::new(Sphere {
             center: Vec3::new(0.0, -100.5, -1.0),
             radius: 100.0,
