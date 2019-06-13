@@ -25,16 +25,15 @@ impl Hitable for TriangulatedModel {
             return None;
         }
 
-        for (v0, v1, v2) in self.mesh.iter_triangles() {
-            if let Some(t) = ray_triangle_intersect(ray, v0, v1, v2) {
+        for (i, (v0, v1, v2)) in self.mesh.iter_triangles().enumerate() {
+            if let Some(t) = ray_triangle_intersect(ray, v0.position, v1.position, v2.position) {
                 if !(t > t_min && t < t_max) {
                     continue;
                 }
-
                 return Some(HitRecord {
                     t,
                     p: ray.point_at_parameter(t),
-                    normal: Vec3::new(0.0, 0.0, 1.0),
+                    normal: (v0.normal + v1.normal + v2.normal) / 3.0,
                     material: self.material.clone(),
                 });
             }

@@ -52,17 +52,15 @@ fn random_in_unit_sphere() -> Vec3 {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let m = load_obj(r"sample.obj");
-
     let width = 1920;
     let height = 1080;
     let ns = 100;
 
     let hitables = HitableList::from_vec(vec![
         Box::new(TriangulatedModel::new(
-            m,
+            load_obj(r"C:\Projects\mrtx\sample.obj"),
             Arc::new(
-                Lambertian { albedo: Vec3::new(0.8, 0.3, 0.3) }
+                Metal { albedo: Vec3::new(0.8, 0.6, 0.2) }
             ),
         )),
         Box::new(Sphere {

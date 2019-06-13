@@ -5,6 +5,7 @@ pub(crate) struct Mesh {
     vertices: Vec<Vec3>,
     normals: Vec<Vec3>,
     triangles: Vec<(u32, u32, u32)>,
+    triangles_normals: Vec<(u32, u32, u32)>,
     aabb: Aabb,
 }
 
@@ -36,6 +37,7 @@ pub(crate) struct MeshBuilder {
     vertices: Vec<Vec3>,
     normals: Vec<Vec3>,
     triangles: Vec<(u32, u32, u32)>,
+    triangles_normals: Vec<(u32, u32, u32)>,
 }
 
 impl MeshBuilder {
@@ -44,18 +46,30 @@ impl MeshBuilder {
             vertices: vec![],
             normals: vec![],
             triangles: vec![],
+            triangles_normals: vec![],
         }
     }
 
-    pub(crate) fn push_vertex(&mut self, v: Vec3, n: Vec3) -> VertexIndex {
+    pub(crate) fn push_normal(&mut self, n: Vec3) -> NormalIndex {
+        let idx = self.normals.len() as u32;
+        self.normals.push(n);
+        NormalIndex(idx)
+    }
+
+    pub(crate) fn push_vertex(&mut self, v: Vec3) -> VertexIndex {
         let idx = self.vertices.len() as u32;
         self.vertices.push(v);
-        self.normals.push(n);
         VertexIndex(idx)
     }
 
-    pub(crate) fn push_face(&mut self, v0: VertexIndex, v1: VertexIndex, v2: VertexIndex) {
+    pub(crate) fn push_face(
+        &mut self,
+        v0: VertexIndex, n0: NormalIndex,
+        v1: VertexIndex, n1: NormalIndex,
+        v2: VertexIndex, n2: NormalIndex,
+    ) {
         self.triangles.push((v0.0, v1.0, v2.0));
+        self.triangles_normals.push((n0.0, n1.0, n2.0))
     }
 
     pub(crate) fn build(self) -> Mesh {
@@ -75,6 +89,7 @@ impl MeshBuilder {
             vertices: self.vertices,
             normals: self.normals,
             triangles: self.triangles,
+            triangles_normals: self.triangles_normals,
             aabb,
         }
     }
@@ -83,12 +98,16 @@ impl MeshBuilder {
 #[derive(Copy, Clone)]
 pub(crate) struct VertexIndex(u32);
 
+#[derive(Copy, Clone)]
+pub(crate) struct NormalIndex(u32);
+
 impl Mesh {
     pub(crate) fn new() -> Self {
         Self {
             vertices: vec![],
             normals: vec![],
             triangles: vec![],
+            triangles_normals: vec![],
             aabb: Aabb::default(),
         }
     }
@@ -101,19 +120,33 @@ impl Mesh {
         &self.vertices
     }
 
+    pub(crate) fn normals(&self) -> &[Vec3] {
+        &self.normals
+    }
+
     pub(crate) fn triangles(&self) -> &[(u32, u32, u32)] {
         &self.triangles
     }
 
-    pub(crate) fn iter_triangles<'a>(&'a self) -> impl Iterator<Item=(Vec3, Vec3, Vec3)> + 'a {
+    pub(crate) fn iter_triangles<'a>(&'a self) -> impl Iterator<Item=(Vertex, Vertex, Vertex)> + 'a {
         self.triangles
             .iter()
-            .map(move |&(i0, i1, i2)| (
-                self.vertices[i0 as usize],
-                self.vertices[i1 as usize],
-                self.vertices[i2 as usize]
-            ))
+            .enumerate()
+            .map(move |(i, &(i0, i1, i2))| {
+                let (n0, n1, n2) = self.triangles_normals[i];
+                (
+                    Vertex { position: self.vertices[i0 as usize], normal: self.normals[n0 as usize] },
+                    Vertex { position: self.vertices[i1 as usize], normal: self.normals[n1 as usize] },
+                    Vertex { position: self.vertices[i2 as usize], normal: self.normals[n2 as usize] },
+                )
+            })
     }
+}
+
+#[derive(Copy, Clone)]
+pub(crate) struct Vertex {
+    pub(crate) position: Vec3,
+    pub(crate) normal: Vec3,
 }
 
 pub(crate) fn box_intersect(ray: &Ray, aabb: &Aabb) -> bool {
