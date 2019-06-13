@@ -3,13 +3,13 @@ use crate::hitable::HitRecord;
 use crate::geometry::Vec3;
 use crate::random_in_unit_sphere;
 
-pub(crate) struct ScatterInfo {
+pub(crate) struct Scattered {
     pub(crate) attenuation: Vec3,
     pub(crate) scattered: Ray,
 }
 
 pub(crate) trait Material: Send + Sync {
-    fn scatter(&self, r_in: &Ray, hr: &HitRecord) -> Option<ScatterInfo>;
+    fn scatter(&self, ray: &Ray, hit_record: &HitRecord) -> Option<Scattered>;
 }
 
 pub(crate) struct Lambertian {
@@ -17,11 +17,11 @@ pub(crate) struct Lambertian {
 }
 
 impl Material for Lambertian {
-    fn scatter(&self, r_in: &Ray, hr: &HitRecord) -> Option<ScatterInfo> {
-        let target = hr.p + hr.normal + random_in_unit_sphere();
-        Some(ScatterInfo {
+    fn scatter(&self, ray: &Ray, hit_record: &HitRecord) -> Option<Scattered> {
+        let target = hit_record.point + hit_record.normal + random_in_unit_sphere();
+        Some(Scattered {
             attenuation: self.albedo,
-            scattered: Ray::new(hr.p, target - hr.p),
+            scattered: Ray::new(hit_record.point, target - hit_record.point),
         })
     }
 }
@@ -35,12 +35,12 @@ fn reflect(v: Vec3, n: Vec3) -> Vec3 {
 }
 
 impl Material for Metal {
-    fn scatter(&self, r_in: &Ray, hr: &HitRecord) -> Option<ScatterInfo> {
-        let reflected = reflect(r_in.direction.normalize(), hr.normal);
-        if Vec3::dot(reflected, hr.normal) > 0.0 {
-            Some(ScatterInfo {
+    fn scatter(&self, ray: &Ray, hit_record: &HitRecord) -> Option<Scattered> {
+        let reflected = reflect(ray.direction.normalize(), hit_record.normal);
+        if Vec3::dot(reflected, hit_record.normal) > 0.0 {
+            Some(Scattered {
                 attenuation: self.albedo,
-                scattered: Ray::new(hr.p, reflected),
+                scattered: Ray::new(hit_record.point, reflected),
             })
         } else {
             None
@@ -64,36 +64,36 @@ pub(crate) struct Dielectric {
 }
 
 impl Material for Dielectric {
-    fn scatter(&self, r_in: &Ray, hr: &HitRecord) -> Option<ScatterInfo> {
-        let (outward_normal, ni_over_nt, cosine) = if Vec3::dot(r_in.direction, hr.normal) > 0.0 {
+    fn scatter(&self, ray: &Ray, hit_record: &HitRecord) -> Option<Scattered> {
+        let (outward_normal, ni_over_nt, cosine) = if Vec3::dot(ray.direction, hit_record.normal) > 0.0 {
             (
-                -hr.normal,
+                -hit_record.normal,
                 self.ref_idx,
-                self.ref_idx * Vec3::dot(r_in.direction, hr.normal) / r_in.direction.length()
+                self.ref_idx * Vec3::dot(ray.direction, hit_record.normal) / ray.direction.length()
             )
         } else {
             (
-                hr.normal,
+                hit_record.normal,
                 1.0 / self.ref_idx,
-                -Vec3::dot(r_in.direction, hr.normal) / r_in.direction.length()
+                -Vec3::dot(ray.direction, hit_record.normal) / ray.direction.length()
             )
         };
 
-        let direction = match refract(r_in.direction, outward_normal, ni_over_nt) {
+        let direction = match refract(ray.direction, outward_normal, ni_over_nt) {
             Some(refracted) => {
                 let reflect_prob = schlick(cosine, self.ref_idx);
                 if rand::random::<f32>() < reflect_prob {
-                    reflect(r_in.direction, hr.normal)
+                    reflect(ray.direction, hit_record.normal)
                 } else {
                     refracted
                 }
             }
-            None => reflect(r_in.direction, hr.normal),
+            None => reflect(ray.direction, hit_record.normal),
         };
 
-        Some(ScatterInfo {
+        Some(Scattered {
             attenuation: Vec3::new(1.0, 1.0, 1.0),
-            scattered: Ray::new(hr.p, direction),
+            scattered: Ray::new(hit_record.point, direction),
         })
     }
 }

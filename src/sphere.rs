@@ -23,7 +23,7 @@ impl Hitable for Sphere {
                 let p = ray.point_at_parameter(t);
                 return Some(HitRecord {
                     t,
-                    p,
+                    point: p,
                     normal: (p - self.center) / self.radius,
                     material: self.material.clone(),
                 });
@@ -34,7 +34,7 @@ impl Hitable for Sphere {
                 let p = ray.point_at_parameter(t);
                 return Some(HitRecord {
                     t,
-                    p,
+                    point: p,
                     normal: (p - self.center) / self.radius,
                     material: self.material.clone(),
                 });

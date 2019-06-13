@@ -32,7 +32,7 @@ impl Hitable for TriangulatedModel {
                 }
                 return Some(HitRecord {
                     t,
-                    p: ray.point_at_parameter(t),
+                    point: ray.point_at_parameter(t),
                     normal: (v0.normal + v1.normal + v2.normal) / 3.0,
                     material: self.material.clone(),
                 });

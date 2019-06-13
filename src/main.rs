@@ -19,7 +19,7 @@ use crate::hitable::Hitable;
 use crate::hitable_list::HitableList;
 use crate::sphere::Sphere;
 use crate::camera::Camera;
-use crate::material::{ScatterInfo, Lambertian, Metal, Dielectric};
+use crate::material::{Scattered, Lambertian, Metal, Dielectric};
 use std::sync::Arc;
 use crate::triangulated_model::TriangulatedModel;
 use crate::mesh_utils::load_obj;
@@ -28,7 +28,7 @@ fn color(ray: &Ray, hitable: &dyn Hitable, depth: usize) -> Vec3 {
     match hitable.hit(ray, 0.001, std::f32::INFINITY) {
         Some(record) => {
             if depth < 50 {
-                if let Some(ScatterInfo { attenuation, ref scattered }) = record.material.scatter(ray, &record) {
+                if let Some(Scattered { attenuation, ref scattered }) = record.material.scatter(ray, &record) {
                     return attenuation * color(scattered, hitable, depth + 1);
                 }
             }

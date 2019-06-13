@@ -6,7 +6,7 @@ use std::sync::Arc;
 #[derive(Clone)]
 pub(crate) struct HitRecord {
     pub(crate) t: f32,
-    pub(crate) p: Vec3,
+    pub(crate) point: Vec3,
     pub(crate) normal: Vec3,
     pub(crate) material: Arc<dyn Material>,
 }
