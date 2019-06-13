@@ -22,6 +22,7 @@ use crate::camera::Camera;
 use crate::material::{ScatterInfo, Lambertian, Metal, Dielectric};
 use std::sync::Arc;
 use crate::triangulated_model::TriangulatedModel;
+use crate::mesh_utils::load_obj;
 
 fn color(ray: &Ray, hitable: &dyn Hitable, depth: usize) -> Vec3 {
     match hitable.hit(ray, 0.001, std::f32::INFINITY) {
@@ -51,16 +52,15 @@ fn random_in_unit_sphere() -> Vec3 {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
+    let m = load_obj(r"sample.obj");
+
     let width = 1920;
     let height = 1080;
     let ns = 100;
 
     let hitables = HitableList::from_vec(vec![
         Box::new(TriangulatedModel::new(
-            mesh_utils::generate_test_mesh(
-                0.2,
-                Vec3::new(0.0, 0.0, -1.0),
-            ),
+            m,
             Arc::new(
                 Lambertian { albedo: Vec3::new(0.8, 0.3, 0.3) }
             ),

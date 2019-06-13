@@ -2,7 +2,7 @@ use crate::hitable::{Hitable, HitRecord};
 use crate::ray::Ray;
 use crate::geometry::Vec3;
 use crate::material::Material;
-use crate::mesh::Mesh;
+use crate::mesh::{Mesh, box_intersect};
 use std::sync::Arc;
 
 pub(crate) struct TriangulatedModel {
@@ -21,6 +21,10 @@ impl TriangulatedModel {
 
 impl Hitable for TriangulatedModel {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
+        if !box_intersect(ray, &self.mesh.aabb()) {
+            return None;
+        }
+
         for (v0, v1, v2) in self.mesh.iter_triangles() {
             if let Some(t) = ray_triangle_intersect(ray, v0, v1, v2) {
                 if !(t > t_min && t < t_max) {
