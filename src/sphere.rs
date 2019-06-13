@@ -2,12 +2,12 @@ use crate::hitable::{Hitable, HitRecord};
 use crate::ray::Ray;
 use crate::geometry::Vec3;
 use crate::material::Material;
-use std::rc::Rc;
+use std::sync::Arc;
 
 pub(crate) struct Sphere {
     pub(crate) center: Vec3,
     pub(crate) radius: f32,
-    pub(crate) material: Rc<dyn Material>,
+    pub(crate) material: Arc<dyn Material>,
 }
 
 impl Hitable for Sphere {

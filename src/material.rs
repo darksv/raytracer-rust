@@ -8,7 +8,7 @@ pub(crate) struct ScatterInfo {
     pub(crate) scattered: Ray,
 }
 
-pub(crate) trait Material {
+pub(crate) trait Material: Send + Sync {
     fn scatter(&self, r_in: &Ray, hr: &HitRecord) -> Option<ScatterInfo>;
 }
 
